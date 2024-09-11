@@ -1,4 +1,8 @@
 pandas
 numpy
 seaborn
--e .
+matplotlib
+scikit-learn
+catboost
+xgboost
+# -e . # Comment this line when working on project and build it at last
