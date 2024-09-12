@@ -4,19 +4,10 @@ from src.exception import customException
 from src.logger import logging
 
 from dataclasses import dataclass
-
-from catboost import CatBoostRegressor
-from sklearn.ensemble import (AdaBoostRegressor,
-    GradientBoostingRegressor,
-    RandomForestRegressor)
-from sklearn.linear_model import LinearRegression
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.tree import DecisionTreeRegressor
-from xgboost import XGBRegressor
-
 from sklearn.metrics import r2_score
 
 from src.utils import save_object, evaluate_model
+from src.components.model_selection import get_model
 
 @dataclass
 class ModelTrainerConfig():
@@ -32,18 +23,16 @@ class ModelTrainer():
             X_train, y_train, X_test, y_test = (train_array[:,:-1], train_array[:,-1],
                                                 test_array[:,:-1], test_array[:,-1])
             
-            models = {
-                "Random Forest Regressor": RandomForestRegressor(),
-                "Decision Tree": DecisionTreeRegressor(),
-                "Gradient Boosting": GradientBoostingRegressor(),
-                "Linear Regression": LinearRegression(),
-                "K-Neighbors Regressor": KNeighborsRegressor(),
-                "XGBRegressor": XGBRegressor(), 
-                "CatBoosting Regressor": CatBoostRegressor(verbose=False,train_dir='artifact/catboost_info/'),
-                "AdaBoost Regressor": AdaBoostRegressor()
-            }
+            model_name = [
+                "Random Forest", "Decision Tree",
+                "Gradient Boosting", "Linear Regression",
+                "XGB Regressor", "CatBoosting Regressor",
+                "AdaBoost Regressor", "KNN Regressor"
+            ]
             
-            model_report:dict = evaluate_model(X_train=X_train, y_train=y_train,
+            models = get_model(model_name)
+            
+            model_report, gscv_model = evaluate_model(X_train=X_train, y_train=y_train,
                                                 X_test=X_test, y_test=y_test,
                                                 models=models)
             
@@ -52,7 +41,7 @@ class ModelTrainer():
                 list(model_report.values()).index(best_model_score)
             ]
 
-            best_model = models[best_model_name]
+            best_model = gscv_model[best_model_name]
 
             if best_model_score < 0.6:
                 raise customException("All Models have r2_score less than 0.6")

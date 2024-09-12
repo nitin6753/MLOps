@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 import dill
 
-from sklearn.metrics import r2_score
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import r2_score,accuracy_score,recall_score,precision_score,f1_score,mean_squared_error
 
 from src.exception import customException
 from src.logger import logging
@@ -41,13 +42,19 @@ def get_columns(df,target_column):
 def evaluate_model(X_train, y_train, X_test, y_test, models):
     try:
         report = {}
+        best_estimators={}
 
         for i in range(len(list(models))):
             
             model_name = list(models.keys())[i]
-            model = list(models.values())[i]
-            
-            model.fit(X_train, y_train) # Train model
+            model = models[model_name]['model']
+            scoring = ['r2','neg_mean_squared_error']
+            params = models[model_name]['params']
+
+            gscv = GridSearchCV(model,params,scoring=scoring,cv=3,refit='r2')
+            gscv.fit(X_train,y_train)
+            model = gscv.best_estimator_
+            best_estimators[model_name]=model
             # Make predictions
             y_train_pred = model.predict(X_train)
             y_test_pred = model.predict(X_test)
@@ -59,7 +66,7 @@ def evaluate_model(X_train, y_train, X_test, y_test, models):
             
             logging.info(f"Model Trained: {model_name}")
 
-        return report
+        return report, best_estimators
     
     except Exception as e:
         raise customException(e,sys)
