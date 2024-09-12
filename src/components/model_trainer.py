@@ -6,8 +6,7 @@ from src.logger import logging
 from dataclasses import dataclass
 from sklearn.metrics import r2_score
 
-from src.utils import save_object, evaluate_model
-from src.components.model_selection import get_model
+from src.utils import save_object, evaluate_model, get_model
 
 @dataclass
 class ModelTrainerConfig():
