@@ -6,4 +6,5 @@ scikit-learn
 catboost
 xgboost
 dill
+flask
 # -e . # Comment this line when working on project and build it at last
