@@ -5,6 +5,7 @@ from src.logger import logging
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
+from pymongo import MongoClient
 
 from src.components.data_transformation import DataTransformation
 from src.components.model_trainer import ModelTrainer
@@ -22,8 +23,14 @@ class DataIngestion():
     def initiate_data_ingestion(self):
         logging.info("Entered the data ingestion component")
         try:
-            df = pd.read_csv('notebook\data\stud.csv')
-            logging.info("Read the dataset as pandas dataframe")
+            client = MongoClient("localhost",27017)
+            db = client['Student']
+            collection = db['Scores']
+            df = pd.DataFrame(list(collection.find()))
+            client.close()
+            df = df.drop(columns="_id",axis=1).reset_index(drop=True)
+
+            logging.info("Read the dataset as pandas dataframe from MongoDB")
             
             os.makedirs(os.path.dirname(self.ingestion_config.raw_data_path),exist_ok=True)
             os.makedirs(os.path.dirname(self.ingestion_config.train_data_path),exist_ok=True)
