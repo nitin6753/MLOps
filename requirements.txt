@@ -7,4 +7,5 @@ catboost
 xgboost
 dill
 flask
+pymongo
 # -e . # Comment this line when working on project and build it at last
